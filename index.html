@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="robots" content="noindex">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>e-Stat API サンプルアプリ</title>
+    <link rel="stylesheet" href="http://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,700" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="contents">
+      <div class="contents-x">
+        <main role="main" class="main">
+          <div class="main-visualization">
+            <div id="chart" class="chart main-chart show"></div>
+            <div id="map" class="map main-map"></div>
+          </div>
+          <div class="main-details">
+            <div class="main-detail">
+              <table id="table1" class="main-table"></table>
+            </div>
+            <div class="main-detail">
+              <table id="table2" class="main-table"></table>
+            </div>
+          </div>
+
+        </main>
+
+        <aside class="side-bar">
+
+          <header class="tool-bar side-bar-header">
+            <div class="side-bar-title">
+              e-stat API サンプルアプリ
+            </div>
+            <div class="config-button icon-settings">&nbsp;&nbsp;</div>
+          </header>
+<!-- 
+         	<div class="menu" id="config-btn" class="tool-bar-btn">AppIdの保存</div>
+
+         	<div class="modal-content modal-content-padding">
+          		<input type="text" id="config-appid" class="modal-text" placeholder="App ID" />
+        	</div>
+ -->
+         	<div id="load-data-list-btn" class="menu">データの追加等</div>
+         	<div id="load-data-list" class="side-bar-content" style="display:none;">
+          			<div>
+          				<ul>
+          					<li class="add-statsId">
+          						<input type="button" id="add-statsId" value="追加" />
+          					</li>
+          				</ul>
+          				
+          			</div>
+          			<div>
+						<input type="button" id="load-statsId" value="ロード" />
+          			</div>
+					<div class="file-upload">
+						<input type="file" id="file" />
+					</div>
+					<div class="remove-user-data">
+							<a href="#">ユーザーデータの削除</a>
+					</div>
+          		</div>
+          <div class="side-bar-content">
+			<div id="loading" class="main-header-loading">
+				<img src="data:image/gif;base64,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" />
+				データ取得中...
+			</div>
+            <a href="#" id="chart-type-selector" class="selector">
+              <span class="selector-icon icon"></span>
+              <span class="selector-content">
+                <span class="selector-subtitle">グラフの種類</span>
+                <span class="selector-text"></span>
+              </span>
+            </a>
+          </div>
+
+          <div id="side-bar-tab-bar" class="tab-bar"></div>
+          <div id="side-bar-tab1" class="side-bar-content side-bar-main"></div>
+          <div id="side-bar-tab2" class="side-bar-content side-bar-main"></div>
+
+        </aside>
+
+      </div>
+
+    </div>
+
+    <div id="config" class="modal">
+      <div class="modal-inner">
+        <header class="modal-header">
+          <h1 class="modal-title">設定</h1>
+        </header>
+        <div class="modal-content modal-content-padding">
+          <p><input type="text" id="config-appid" class="modal-text" placeholder="App ID" /></p>
+        </div>
+        <footer class="modal-footer tool-bar">
+          <span class="tool-bar-space"></span>
+          <a href="#" class="modal-btn modal-close">閉じる</a>
+        </footer>
+      </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+    <script src="https://d3js.org/d3.v3.min.js"></script>
+    <script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/es6-promise/3.0.2/es6-promise.min.js"></script>
+    <script>
+    	var pref_points = {'北海道':[43.063968,141.347899],'青森県':[40.824623,140.740593],'岩手県':[39.703531,141.152667],'宮城県':[38.268839,140.872103],'秋田県':[39.718600,140.102334],'山形県':[38.240437,140.363634],'福島県':[37.750299,140.467521],'茨城県':[36.341813,140.446793],'栃木県':[36.565725,139.883565],'群馬県':[36.391208,139.060156],'埼玉県':[35.857428,139.648933],'千葉県':[35.605058,140.123308],'東京都':[35.689521,139.691704],'神奈川県':[35.447753,139.642514],'新潟県':[37.902418,139.023221],'富山県':[36.695290,137.211338],'石川県':[36.594682,136.625573],'福井県':[36.065219,136.221642],'山梨県':[35.664158,138.568449],'長野県':[36.651289,138.181224],'岐阜県':[35.391227,136.722291],'静岡県':[34.976978,138.383054],'愛知県':[35.180188,136.906565],'三重県':[34.730283,136.508591],'滋賀県':[35.004531,135.868590],'京都府':[35.021004,135.755608],'大阪府':[34.686316,135.519711],'兵庫県':[34.691279,135.183025],'奈良県':[34.685333,135.832744],'和歌山県':[34.226034,135.167506],'鳥取県':[35.503869,134.237672],'島根県':[35.472297,133.050499],'岡山県':[34.661772,133.934675],'広島県':[34.396560,132.459622],'山口県':[34.186121,131.470500],'徳島県':[34.065770,134.559303],'香川県':[34.340149,134.043444],'愛媛県':[33.841660,132.765362],'高知県':[33.559705,133.531080],'福岡県':[33.606785,130.418314],'佐賀県':[33.249367,130.298822],'長崎県':[32.744839,129.873756],'熊本県':[32.789828,130.741667],'大分県':[33.238194,131.612591],'宮崎県':[31.911090,131.423855],'鹿児島県':[31.560148,130.557981],'沖縄県':[26.212401,127.680932]}
+    </script>
+    </script>
+    <script src="main.js"></script>
+	<script>
+		$(document).ready(function() {
+			try{
+				if(window.localStorage.getItem('userData') == null){
+					$('.remove-user-data').remove()
+				}
+				else
+				{
+					$('.file-upload').remove()
+					$('.remove-user-data a').click(function(){
+						window.localStorage.removeItem('userData')
+						location.href = '';
+					})
+				}
+			}catch(e){}
+ 			$('.main').height($('.main').height())
+			$('.main-visualization').css('min-height','80%');
+			$('.main-details').css('min-height','20%');
+			$( ".main-visualization" ).resizable({
+				 minWidth:$('.main').width()
+				,maxWidth:$('.main').width()
+			}).on('resize',function(event,ui){
+				$('.main-visualization').css('min-height','');
+				$('.main-details').css('min-height','');
+				$('.main-details').height(
+					$('.main').height() - $( ".main-visualization" ).height()
+				)		
+			});
+			$('#load-data-list-btn').click(function(){
+				return $('#load-data-list').css('display') == 'none' ?
+					$('#load-data-list').show() :
+					$('#load-data-list').hide() ;
+			})
+			$('#load-data-list ul li span').click(function(){ $(this).parents('li').remove(); })
+			$('#add-statsId').click(function(){
+					$('<li/>').append(
+						$('<input/>').attr({
+							 'type'  : 'text'
+							,'class' : 'statsId'
+							,'value' : ''
+							,'placeholder':'統計IDを入力して下さい'
+						})
+						,$('<span/>').text('x').click(function(){ $(this).parents('li').remove(); })
+					).insertBefore('.add-statsId')
+			})
+			$('#load-statsId').click(function(){
+				location.href = '?statIds=' + $.grep($('.statsId').map(function(i,x){ return x.value; }).get(), function(e){return e;}).join(',')
+			});
+			$('.config-button').click(function(){
+				App.saveAppId(prompt('AppIdを入力してください'))
+				location.href = ''
+			})
+		})
+	</script>
+  </body>
+</html>
